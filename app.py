@@ -1,26 +1,27 @@
 import streamlit as st
-import pandas as pd
 import pickle
-from sklearn.feature_extraction.text import TfidfVectorizer
 
-# Load the saved model and vectorizer
-model = pickle.load(open("model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+# Load model and vectorizer
+with open('mpdel.pkl', 'rb') as model_file:
+    model = pickle.load(model_file)
 
-# Title and instructions
-st.title("SMS Spam Detection App")
-st.write("Enter a message below to check if it's spam:")
+with open('vectorizer.pkl', 'rb') as vec_file:
+    vectorizer = pickle.load(vec_file)
 
-# Text input
-message = st.text_area("Message")
+# Streamlit UI
+st.title("Spam Detection App")
+st.subheader("Check if a message is Spam or not")
 
-# Predict button
-if st.button("Check"):
-    # Transform message
-    message_transformed = vectorizer.transform([message])
-    prediction = model.predict(message_transformed)
+input_msg = st.text_area("Enter the message:")
 
-    if prediction[0] == 1:
-        st.error("Spam Message Detected!")
+if st.button("Predict"):
+    if input_msg.strip() == "":
+        st.warning("Please enter a message.")
     else:
-        st.success("This message is NOT spam.")
+        vect_msg = vectorizer.transform([input_msg])
+        prediction = model.predict(vect_msg)
+
+        if prediction[0] == 1:
+            st.error("This message is likely SPAM.")
+        else:
+            st.success("This message is NOT spam.")
