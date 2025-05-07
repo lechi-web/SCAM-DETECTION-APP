@@ -2,14 +2,14 @@ import streamlit as st
 import pickle
 
 # Load model and vectorizer
-with open('mpdel.pkl', 'rb') as model_file:
+with open('model.pkl', 'rb') as model_file:
     model = pickle.load(model_file)
 
 with open('vectorizer.pkl', 'rb') as vec_file:
     vectorizer = pickle.load(vec_file)
 
 # Streamlit UI
-st.title("Spam Detection App")
+st.title("Scam Detection App")
 st.subheader("Check if a message is Spam or not")
 
 input_msg = st.text_area("Enter the message:")
