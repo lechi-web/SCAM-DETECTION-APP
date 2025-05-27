@@ -18,8 +18,8 @@ if st.button("Predict"):
     if input_msg.strip() == "":
         st.warning("Please enter a message.")
     else:
-        clean_msg = input_msg.strip().lower()        
-        prediction = model.predict(input_msg)
+        vect_msg = vectorizer.transform([input_msg])        
+        prediction = model.predict(vect_msg)
 
         if prediction[0] == 1:
             st.error("This message is likely SPAM.")
