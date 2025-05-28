@@ -47,4 +47,8 @@ print("Model Accuracy:", accuracy_score(y_test, y_pred))
 with open("model.pkl", "wb") as model_file:
     pickle.dump(pipeline, model_file)
 
+# Save vectorizer
+with open("vectorizer.pkl", "wb") as vec_file:
+    pickle.dump(tfidf, vec_file)
+
 print("Model saved as model.pkl")
