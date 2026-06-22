@@ -1,14 +1,14 @@
-from groq import Groq
-
 import os
 from dotenv import load_dotenv
 from groq import Groq
 
-load_dotenv()
+load_dotenv(dotenv_path=".env")
+
+print("Current folder:", os.getcwd())
+print("API KEY FOUND:", os.getenv("GROQ_API_KEY"))
 
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
-
 )
 
 response = client.chat.completions.create(
