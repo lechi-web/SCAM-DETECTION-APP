@@ -49,7 +49,7 @@ if st.button("Predict"):
         if prediction[0] == 1:
             st.error("🚨 High Risk: This message is likely a scam.")
         else:
-            st.info("🔍 Running AI security analysis...")
+           st.info("🔍 Scanning message...")
 
 
     response = client.chat.completions.create(
@@ -74,6 +74,7 @@ if st.button("Predict"):
         )
 
     analysis = response.choices[0].message.content
+    st.success("✅ Scan completed. Results ready.")
 
     st.subheader("🤖 AI Security Report")
 
