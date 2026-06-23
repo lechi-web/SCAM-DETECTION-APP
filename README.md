@@ -15,3 +15,5 @@ Tech Stack:
 - Scikit-learn
 - Groq LLM API
 - NLP
+Live Demo:
+https://scam-detection-app-ptaykuzjn3reykddgpkehr.streamlit.app/
