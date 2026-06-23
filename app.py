@@ -75,13 +75,14 @@ if st.button("Predict"):
         )
 
     analysis = response.choices[0].message.content
-    st.success("✅ Scan completed. Results ready.")
+    status.empty()
+st.success("✅ Scan completed. Results ready.")
 
-    st.subheader("🤖 AI Security Report")
+st.subheader("🤖 AI Security Report")
 
-    if "scam" in analysis.lower() or "phishing" in analysis.lower():
+if "scam" in analysis.lower() or "phishing" in analysis.lower():
             st.error("🚨 AI Assessment: This message is likely SPAM.")
-    else:
+else:
             st.success("✅ AI Assessment: No strong scam indicators detected.")
 
-    st.write(analysis)
+st.write(analysis)
