@@ -49,7 +49,8 @@ if st.button("Predict"):
         if prediction[0] == 1:
             st.error("🚨 High Risk: This message is likely a scam.")
         else:
-           st.info("🔍 Scanning message...")
+          status = st.empty()
+    status.info("🔍 Scanning message...")
 
 
     response = client.chat.completions.create(
