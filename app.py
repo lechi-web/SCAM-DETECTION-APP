@@ -44,16 +44,12 @@ if st.button("Predict"):
         st.warning("Please enter a message.")
 
     else:
+        status = st.empty()
+        status.info("🔍 Scanning message...")
+
         prediction = model.predict([input_msg])
 
-        if prediction[0] == 1:
-            st.error("🚨 High Risk: This message is likely a scam.")
-        else:
-          status = st.empty()
-    status.info("🔍 Scanning message...")
-
-
-    response = client.chat.completions.create(
+        response = client.chat.completions.create(
             model="llama-3.3-70b-versatile",
             messages=[
                 {
@@ -74,15 +70,17 @@ if st.button("Predict"):
             ]
         )
 
-    analysis = response.choices[0].message.content
-    status.empty()
-st.success("✅ Scan completed. Results ready.")
+        status.empty()
 
-st.subheader("🤖 AI Security Report")
+        st.success("✅ Scan completed. Results ready.")
 
-if "scam" in analysis.lower() or "phishing" in analysis.lower():
+        analysis = response.choices[0].message.content
+
+        st.subheader("🤖 AI Security Report")
+
+        if "scam" in analysis.lower() or "phishing" in analysis.lower():
             st.error("🚨 AI Assessment: This message is likely SPAM.")
-else:
+        else:
             st.success("✅ AI Assessment: No strong scam indicators detected.")
 
-st.write(analysis)
+        st.write(analysis)
