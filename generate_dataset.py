@@ -10,50 +10,32 @@ load_dotenv()
 client = Groq(
     api_key=os.getenv("GROQ_API_KEY")
 )
+print("\nSelect dataset to generate:\n")
 
-# Prompt
-prompt = """
-Generate 30 realistic phishing SMS messages commonly seen in Nigeria.
+print("1. Banking")
+print("2. Job")
+print("3. Investment")
+print("4. Delivery")
 
-Requirements:
+choice = input("\nEnter your choice (1-4): ")
 
-- Use Nigerian banks and fintech companies.
-- Include:
-    - GTBank
-    - Access Bank
-    - Zenith Bank
-    - UBA
-    - First Bank
-    - Fidelity Bank
-    - Opay
-    - PalmPay
-    - Moniepoint
-    - Kuda
+prompt_files = {
+    "1": "prompts/banking_prompt.txt",
+    "2": "prompts/job_prompt.txt",
+    "3": "prompts/investment_prompt.txt",
+    "4": "prompts/delivery_prompt.txt"
+}
 
-Common scam themes:
+if choice not in prompt_files:
+    print("❌ Invalid choice.")
+    exit()
 
-- BVN verification
-- NIN update
-- KYC verification
-- Debit card blocked
-- Suspicious login
-- Fake transfers
-- Fake debit alerts
-- Account suspension
-- Loan offers
-- POS settlement
-- OTP requests
+with open(prompt_files[choice], "r", encoding="utf-8") as file:
+    prompt = file.read()
 
-Rules:
-
-- Each message should sound realistic.
-- Use urgency naturally.
-- Include fake links where appropriate.
-- One message per line.
-- No numbering.
-- No explanations.
-- Return ONLY the messages.
-"""
+print("\n========== PROMPT BEING SENT ==========\n")
+print(prompt)
+print("\n=======================================\n")
 
 # Send request to Groq
 response = client.chat.completions.create(
@@ -82,7 +64,16 @@ for line in generated_text.split("\n"):
 df = pd.DataFrame(messages, columns=["v1", "v2"])
 
 # Save CSV
-df.to_csv("generated_phishing_messages.csv", index=False)
+dataset_names = {
+    "1": "banking_scams.csv",
+    "2": "job_scams.csv",
+    "3": "investment_scams.csv",
+    "4": "delivery_scams.csv"
+}
 
-print("✅ Dataset generated successfully!")
+output_file = os.path.join("datasets", dataset_names[choice])
+
+df.to_csv(output_file, index=False)
+
+print(f"✅ Dataset saved successfully as {output_file}")
 print(df.head())
