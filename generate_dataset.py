@@ -13,14 +13,45 @@ client = Groq(
 
 # Prompt
 prompt = """
-Generate 20 realistic banking phishing SMS messages.
+Generate 30 realistic phishing SMS messages commonly seen in Nigeria.
+
+Requirements:
+
+- Use Nigerian banks and fintech companies.
+- Include:
+    - GTBank
+    - Access Bank
+    - Zenith Bank
+    - UBA
+    - First Bank
+    - Fidelity Bank
+    - Opay
+    - PalmPay
+    - Moniepoint
+    - Kuda
+
+Common scam themes:
+
+- BVN verification
+- NIN update
+- KYC verification
+- Debit card blocked
+- Suspicious login
+- Fake transfers
+- Fake debit alerts
+- Account suspension
+- Loan offers
+- POS settlement
+- OTP requests
 
 Rules:
-- They must look like real SMS messages.
+
+- Each message should sound realistic.
+- Use urgency naturally.
+- Include fake links where appropriate.
 - One message per line.
-- Do not number them.
-- Do not add bullet points.
-- Do not add explanations.
+- No numbering.
+- No explanations.
 - Return ONLY the messages.
 """
 
