@@ -5,22 +5,29 @@ from groq import Groq
 
 from utils.text_cleaner import clean_message
 
+
 # ==========================================
-# Load environment variables
+# Load Environment Variables
 # ==========================================
+
 load_dotenv()
 
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
+api_key = os.getenv("GROQ_API_KEY")
+
+if not api_key:
+    print("❌ GROQ_API_KEY not found.")
+    exit()
+
+client = Groq(api_key=api_key)
+
 
 # ==========================================
 # Welcome Screen
 # ==========================================
 
-print("=" * 40)
-print("      ScamBuster Dataset Engine")
-print("=" * 40)
+print("=" * 50)
+print("          ScamBuster Dataset Engine")
+print("=" * 50)
 
 print("\nAvailable Categories\n")
 
@@ -29,13 +36,12 @@ print("2. 💼 Job Scams")
 print("3. 💰 Investment Scams")
 print("4. 📦 Delivery Scams")
 
-print("\n" + "-" * 40)
+print("\n" + "-" * 50)
+
 
 # ==========================================
-# User Input
+# Dataset Configuration
 # ==========================================
-
-choice = input("\nEnter your choice (1-4): ")
 
 prompt_files = {
     "1": "prompts/banking_prompt.txt",
@@ -51,11 +57,21 @@ dataset_names = {
     "4": "delivery_scams.csv"
 }
 
+
+# ==========================================
+# User Input
+# ==========================================
+
+choice = input("\nEnter your choice (1-4): ")
+
 if choice not in prompt_files:
     print("❌ Invalid choice.")
     exit()
 
-count = input("\nEnter the number of phishing samples to generate: ")
+
+count = input(
+    "\nEnter the number of phishing samples to generate: "
+)
 
 if not count.isdigit():
     print("❌ Please enter a valid number.")
@@ -67,42 +83,71 @@ if count <= 0:
     print("❌ Number must be greater than zero.")
     exit()
 
+
 # ==========================================
 # Load Prompt
 # ==========================================
 
 print("\n📂 Loading prompt...")
 
-with open(prompt_files[choice], "r", encoding="utf-8") as file:
-    prompt = file.read()
+with open(
+    prompt_files[choice],
+    "r",
+    encoding="utf-8"
+) as file:
 
-prompt = prompt.replace("{count}", str(count))
+    prompt_template = file.read()
+
+
+# Replace {count}
+
+prompt = prompt_template.replace(
+    "{count}",
+    str(count)
+)
+
 
 print("✅ Prompt loaded successfully!")
 
+
 # ==========================================
-# Generate Dataset
+# Generate Messages
 # ==========================================
 
 print("\n🤖 Contacting Groq AI...")
+print(f"🎯 Requested messages: {count}")
 
 response = client.chat.completions.create(
+
     model="llama-3.3-70b-versatile",
+
     messages=[
         {
             "role": "user",
             "content": prompt
         }
-    ]
+    ],
+
+    temperature=0.8,
+
+    max_tokens=8000
 )
+
 
 print("✅ AI response received!")
 
-generated_text = response.choices[0].message.content
 
-# Uncomment these if you want to debug later
-# print(prompt)
-# print(generated_text)
+# ==========================================
+# Get AI Response
+# ==========================================
+
+generated_text = (
+    response
+    .choices[0]
+    .message
+    .content
+)
+
 
 # ==========================================
 # Process Messages
@@ -112,57 +157,148 @@ print("\n📝 Processing generated messages...")
 
 messages = []
 
-for line in generated_text.split("\n"):
+seen = set()
+
+
+for line in generated_text.splitlines():
 
     line = clean_message(line)
 
-    if line:
-        messages.append(["spam", line])
+    if not line:
+        continue
 
-# Keep only the requested number
+    # Remove numbering such as:
+    # 1.
+    # 2)
+    # 3 -
+    if line[:2].strip(".-)").isdigit():
+        line = line[2:].strip()
+
+    # Remove duplicate messages
+    normalized = line.lower().strip()
+
+    if normalized in seen:
+        continue
+
+    seen.add(normalized)
+
+    messages.append([
+        "spam",
+        line
+    ])
+
+
+# Keep requested amount
 messages = messages[:count]
 
-# Remove duplicates
-unique_messages = []
-seen = set()
 
-for label, message in messages:
+# ==========================================
+# Check Result
+# ==========================================
 
-    if message not in seen:
-        seen.add(message)
-        unique_messages.append([label, message])
+print(
+    f"✅ {len(messages)} unique messages processed!"
+)
 
-messages = unique_messages
 
-print(f"✅ {len(messages)} messages processed!")
+if len(messages) < count:
+
+    print(
+        f"⚠️ Warning: AI returned only "
+        f"{len(messages)} usable messages "
+        f"out of {count} requested."
+    )
+
+    print(
+        "💡 You can run the generator again "
+        "to create more samples."
+    )
+
+
+# ==========================================
+# Create DataFrame
+# ==========================================
+
+df = pd.DataFrame(
+    messages,
+    columns=["v1", "v2"]
+)
+
+
+# ==========================================
+# Make Sure Dataset Folder Exists
+# ==========================================
+
+os.makedirs(
+    "datasets",
+    exist_ok=True
+)
+
 
 # ==========================================
 # Save Dataset
 # ==========================================
-
-df = pd.DataFrame(messages, columns=["v1", "v2"])
 
 output_file = os.path.join(
     "datasets",
     dataset_names[choice]
 )
 
+
 print("\n💾 Saving dataset...")
 
-df.to_csv(output_file, index=False)
+df.to_csv(
+    output_file,
+    index=False
+)
 
-print("✅ Dataset saved successfully!")
+
+print(
+    f"✅ Dataset saved successfully!"
+)
+
 
 # ==========================================
 # Summary
 # ==========================================
 
-print("\n" + "=" * 40)
-print("      GENERATION SUMMARY")
-print("=" * 40)
+print("\n" + "=" * 50)
+print("             GENERATION SUMMARY")
+print("=" * 50)
 
-print(f"Category : {dataset_names[choice]}")
-print(f"Messages : {len(df)}")
-print(f"Output   : {output_file}")
+print(
+    f"Category : {dataset_names[choice]}"
+)
 
-print("=" * 40)
+print(
+    f"Requested: {count}"
+)
+
+print(
+    f"Generated: {len(df)}"
+)
+
+print(
+    f"Output   : {output_file}"
+)
+
+print("=" * 50)
+
+
+# ==========================================
+# Preview
+# ==========================================
+
+if not df.empty:
+
+    print("\n📋 Dataset Preview:\n")
+
+    print(
+        df.head(10).to_string(index=False)
+    )
+
+else:
+
+    print(
+        "\n❌ No messages were generated."
+    )
